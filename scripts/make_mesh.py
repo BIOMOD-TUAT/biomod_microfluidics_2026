@@ -22,7 +22,7 @@ def main():
     print("\n=== 2. STLファイルのスケール変換 ===")
     # CADから出力したSTLがmm単位の場合、OpenFOAM(m単位)に合わせるために0.001倍します。
     # ※不要な場合（すでにm単位の場合）や、二重変換を防ぐ場合はコメントアウトしてください。
-    # run_cmd("surfaceTransformPoints -scale '(0.001 0.001 0.001)' constant/triSurface/flow_channel.stl constant/triSurface/flow_channel.stl", cwd_path=mesh_base)
+    run_cmd("surfaceTransformPoints -scale '(0.001 0.001 0.001)' constant/triSurface/flow_channel.stl constant/triSurface/flow_channel.stl", cwd_path=mesh_base)
 
     print("\n=== 3. メッシュとパッチの生成 ===")
     run_cmd("blockMesh > log.blockMesh 2>&1", cwd_path=mesh_base)

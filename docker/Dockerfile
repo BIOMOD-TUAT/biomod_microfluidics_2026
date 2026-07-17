@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     git \
     nano \
+    psmisc \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # OpenFOAM (ESI版 v2312) のリポジトリ追加とインストール

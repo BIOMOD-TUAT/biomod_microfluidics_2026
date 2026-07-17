@@ -1,0 +1,19 @@
+FoamFile { format ascii; class dictionary; location "system"; object controlDict; }
+application     interFoam;
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         0.05;      // 解析時間[s] (液滴が数個生成される程度の時間に調整)
+deltaT          1e-06;    // 初期時間刻み
+writeControl    adjustableRunTime;
+writeInterval   0.005;    // 結果を保存する間隔[s]
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  6;
+writeCompression off;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable true;
+adjustTimeStep  yes;      // クーラン数に基づく自動時間刻み調整をON
+maxCo           0.5;      // 最大クーラン数
+maxAlphaCo      0.5;
