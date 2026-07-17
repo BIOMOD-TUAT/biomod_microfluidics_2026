@@ -1,0 +1,5 @@
+FoamFile { format ascii; class dictionary; location "constant"; object transportProperties; }
+phases (water oil);
+water { transportModel Newtonian; nu 1e-06; rho 1000; }
+oil   { transportModel Newtonian; nu 5e-06; rho 900; }
+sigma 0.035; // 界面張力

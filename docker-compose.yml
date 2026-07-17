@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  openfoam-env:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace # プロジェクトルート全体をマウント
+    ports:
+      - "8888:8888"  # JupyterLab用
+    tty: true        # バックグラウンドで起動状態を維持
+    command: /bin/bash

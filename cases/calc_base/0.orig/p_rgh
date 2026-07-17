@@ -1,0 +1,15 @@
+FoamFile { format ascii; class volScalarField; location "0"; object p_rgh; }
+dimensions [1 -1 -2 0 0 0 0];
+internalField uniform 0;
+boundaryField {
+    // 水のポンプ圧力を 10 kPa (10000 Pa) に設定
+    inlet_water  { type fixedValue; value uniform 3000; }
+    
+    // 油のポンプ圧力を水より少し強い 11 kPa (11000 Pa) に設定してちぎる力を強化
+    inlet_oil1   { type fixedValue; value uniform 7000; }
+    inlet_oil2   { type fixedValue; value uniform 7000; }
+    
+    outlet       { type fixedValue; value uniform 0; } // 大気圧解放
+    
+    flow_channel { type fixedFluxPressure; value uniform 0; }
+}

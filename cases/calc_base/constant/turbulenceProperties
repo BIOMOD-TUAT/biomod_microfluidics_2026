@@ -1,0 +1,10 @@
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      turbulenceProperties;
+}
+
+// 乱流モデルを使用せず、層流として計算する
+simulationType  laminar;

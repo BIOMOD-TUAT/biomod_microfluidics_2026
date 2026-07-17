@@ -1,0 +1,13 @@
+# OpenFOAMの生成メッシュ・結果ファイル
+*/polyMesh/
+postProcessing/
+*.obj
+*.vtk
+
+# 自動化スクリプトで生成される作業用ケースディレクトリ
+cases/run_*/
+
+# Python関連
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

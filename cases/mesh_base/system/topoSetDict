@@ -1,0 +1,20 @@
+FoamFile { format ascii; class dictionary; object topoSetDict; }
+
+actions
+(
+    // 1. 水の入り口
+    { name inlet_water_f; type faceSet; action new; source boxToFace; box (-0.0109 -0.002 -0.002) (-0.0099 0.002 0.002); }
+    { name inlet_water_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+
+    // 2. 油の入り口1
+    { name inlet_oil1_f; type faceSet; action new; source boxToFace; box (-0.002 0.0065 -0.002) (0.002 0.0075 0.002); }
+    { name inlet_oil1_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+
+    // 3. 油の入り口2
+    { name inlet_oil2_f; type faceSet; action new; source boxToFace; box (-0.002 -0.0075 -0.002) (0.002 -0.0065 0.002); }
+    { name inlet_oil2_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+
+    // 4. 出口
+    { name outlet_f; type faceSet; action new; source boxToFace; box (0.0095 -0.002 -0.002) (0.0105 0.002 0.002); }
+    { name outlet_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+);

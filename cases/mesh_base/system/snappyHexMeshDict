@@ -1,0 +1,96 @@
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+
+castellatedMesh true;
+snap            true;
+addLayers       false;
+
+// v2312必須: 頂点マージの許容誤差
+mergeTolerance  1e-6;
+
+geometry
+{
+    flow_channel.stl
+    {
+        type triSurfaceMesh;
+        name flow_channel;
+    }
+}
+
+castellatedMeshControls
+{
+    maxLocalCells 100000;
+    maxGlobalCells 2000000;
+    minRefinementCells 10;
+    maxLoadUnbalance 0.10;
+    nCellsBetweenLevels 3;
+
+    features
+    (
+        {
+            file "flow_channel.eMesh";
+            level 3;
+        }
+    );
+
+    refinementSurfaces
+    {
+        flow_channel
+        {
+            level (3 4);
+        }
+    }
+
+    // v2312必須: 使わなくても空のカッコが必要
+    refinementRegions {}
+
+    resolveFeatureAngle 30;
+
+    // v2312必須: 独立したゾーンの面を許可するかどうかのフラグ
+    allowFreeStandingZoneFaces true;
+
+    // 流路内部（空間）の座標。
+    // ※もしFusionで原点(0 0 0)を「壁の面」に設定している場合は、
+    // 確実に空間になるよう (0.001 0.000 0.000) などにずらしてください。
+    locationInMesh (-0.0005 0 0.000075);
+}
+
+snapControls
+{
+    nSmoothPatch 3;
+    tolerance 2.0;
+    nSolveIter 30;
+    nRelaxIter 5;
+    nFeatureSnapIter 10;
+    
+    // v2312で要求されることがあるスナップ処理の明示
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+    multiRegionFeatureSnap false;
+}
+
+// v2312必須: 使わなくても空のカッコが必要
+addLayersControls {}
+
+// v2312必須: 空だとエラーになるため標準値を明記
+meshQualityControls
+{
+    maxNonOrtho 65;
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+    maxConcave 80;
+    minVol 1e-13;
+    minTetQuality 1e-30;
+    minArea -1;
+    minTwist 0.02;
+    minDeterminant 0.001;
+    minFaceWeight 0.02;
+    minVolRatio 0.01;
+    minTriangleTwist -1;
+    nSmoothScale 4;
+    errorReduction 0.75;
+}

@@ -1,0 +1,6 @@
+FoamFile { format ascii; class dictionary; object surfaceFeatureExtractDict; }
+flow_channel.stl {
+    extractionMethod extractFromSurface;
+    extractFromSurfaceCoeffs { includedAngle 120; }
+    writeObj yes;
+}
