@@ -188,11 +188,17 @@ def objective_factory(
             "native_core": "/workspace/native_core_only",
             "native_stack": "/workspace/native_lib",
             "native_core_lto": "/workspace/native_core_lto",
+            "native_core_pgo_generate": "/workspace/native_core_pgo_generate",
+            "native_core_pgo": "/workspace/native_core_pgo",
             "native_stack_lto": "/workspace/native_stack_lto",
             "native_full_lto": "/workspace/native_full_lto",
             "native_full_lto_pstream": "/workspace/native_full_lto_pstream",
             "native_physics_lto": "/workspace/native_physics_lto",
+            "native_physics_pgo_generate": "/workspace/native_physics_pgo_generate",
+            "native_physics_pgo": "/workspace/native_physics_pgo",
             "native_transport_lto": "/workspace/native_transport_lto",
+            "native_pstream_pgo_generate": "/workspace/native_pstream_pgo_generate",
+            "native_pstream_pgo": "/workspace/native_pstream_pgo",
             "native_fv_pgo_generate": "/workspace/native_fv_pgo_generate",
             "native_fv_pgo": "/workspace/native_fv_pgo",
             "native_fv_pgo_nointerpose_generate": "/workspace/native_fv_pgo_nointerpose_generate",
@@ -404,8 +410,11 @@ def main() -> None:
         help=(
             "Comma-separated library choices: system,native_finite_volume,"
             "native_core,native_stack,native_core_lto,native_stack_lto,"
+            "native_core_pgo_generate,native_core_pgo,"
             "native_full_lto,native_full_lto_pstream,native_physics_lto,"
+            "native_physics_pgo_generate,native_physics_pgo,"
             "native_transport_lto,native_fv_pgo_generate,native_fv_pgo,"
+            "native_pstream_pgo_generate,native_pstream_pgo,"
             "native_fv_pgo_nointerpose_generate,native_fv_pgo_nointerpose,"
             "native_fv_pgo_one_partition,"
             "native_fv_nointerpose"

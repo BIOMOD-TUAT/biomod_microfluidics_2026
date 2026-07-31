@@ -23,7 +23,7 @@
 - ファイルハンドラー：`uncollated`
 - allocator：jemalloc
 - jemalloc設定：単一arena、THP有効
-- ライブラリ：Broadwell向けLTO、no-interposition、専用PGOを適用した`finiteVolume`
+- ライブラリ：one-partition LTOと専用PGOを適用した`finiteVolume`、専用PGOを適用した`libOpenFOAM`
 - 実行ファイル：配布版`interFoam`
 
 allocator設定は次の値である。
@@ -32,8 +32,9 @@ allocator設定は次の値である。
 MALLOC_CONF=narenas:1,background_thread:false,dirty_decay_ms:-1,muzzy_decay_ms:-1,thp:always,metadata_thp:always
 ```
 
-64試行の均衡比較では、候補構成の最良値が`1.050054`秒、中央値が`1.105497`秒だった。
-基準構成（通常のshared-memory MPIと標準jemalloc）の中央値は`1.130072`秒だった。
+OpenFOAMコアPGOの64試行均衡比較では、候補構成の最良値が`1.026366`秒、中央値が`1.083511`秒だった。
+同じ実行時設定でコアPGOを使わない構成の中央値は`1.105612`秒だった。
+探索開始時の壁時計時間は約`1.339`秒だったため、最良値は約23%短い。
 
 目標の`0.8`秒以下には到達していない。
 
@@ -45,6 +46,10 @@ MALLOC_CONF=narenas:1,background_thread:false,dirty_decay_ms:-1,muzzy_decay_ms:-
 | finiteVolume PGO | 10 | 1.095675秒 | 1.135917秒 | 単独版は棄却 |
 | finiteVolume PGO＋no-interposition | 44 | 1.063047秒 | 1.118065秒 | 組合せ候補として採用 |
 | isolated MPI＋single-arena THP | 28 | 1.050054秒 | 1.105497秒 | 現在の実行時候補 |
+| finiteVolume one-partition LTO＋PGO | 30 | 1.035988秒 | 1.105298秒 | 低分散候補として採用 |
+| OpenFOAMコアPGO | 40 | 1.026366秒 | 1.083511秒 | 現在の最速候補 |
+| 物性・界面ライブラリPGO | 40 | 1.036543秒 | 1.078978秒 | 基準との差が0.6msのため不採用 |
+| Pstream PGO（途中結果） | 21 | 1.033945秒 | 1.089543秒 | 43完了時点で停止、未確定 |
 | 配布版interFoam | 18 | 1.049377秒 | 1.106812秒 | 実行ファイル候補 |
 | interFoam PGO＋no-interposition | 12 | 1.070908秒 | 1.129088秒 | 棄却 |
 
@@ -55,6 +60,7 @@ MALLOC_CONF=narenas:1,background_thread:false,dirty_decay_ms:-1,muzzy_decay_ms:-
 
 ランク数、NUMA配置、別allocator、allreduceアルゴリズム、collated出力、RAMディスク、ログ抑制、MPI DVM再利用を試した。
 これらは改善しないか、OpenMPIとOpenFOAMの実行モデルに適合しなかった。
+MPI DVMは同一コンテナ内でもPMIx初期化が`Unreachable`で失敗した。
 
 単純な実行ファイルLTOと実行ファイルPGOも、配布版`interFoam`を安定して上回らなかった。
 finiteVolumeのPGOは、no-interpositionを有効にした状態でプロファイルを取り直した。
@@ -66,6 +72,10 @@ finiteVolumeのPGOは、no-interpositionを有効にした状態でプロファ�
 - `scripts/build_finite_volume_pgo_nointerpose.sh`：計測用と適用用のfiniteVolumeビルド
 - `scripts/run_finite_volume_pgo_nointerpose.sh`：ビルド、学習、プロファイル統合、再ビルド
 - `scripts/build_interfoam_pgo_nointerpose.sh`：interFoam本体の比較用PGOビルド
+- `scripts/build_openfoam_core_pgo.sh`：OpenFOAMコアのPGOビルド
+- `scripts/run_openfoam_core_pgo.sh`：OpenFOAMコアの学習と再ビルド
+- `scripts/build_physics_pgo.sh`：物性・界面ライブラリの比較用PGOビルド
+- `scripts/build_pstream_pgo.sh`：Pstreamの比較用PGOビルド
 - `scripts/compare_vtk_fields.py`：基準版と候補版のVTU配列比較
 - `scripts/monitor_optuna.sh`：studyの進捗確認
 - `docker/Dockerfile`：jemalloc、tcmalloc、numactlの追加
@@ -87,20 +97,24 @@ python3 scripts/optimize_runtime.py \
   --allocators jemalloc_single_arena_thp \
   --decomposition-methods scotch \
   --solvers interFoam \
-  --library-modes native_fv_pgo_nointerpose \
+  --library-modes native_core_pgo \
   --file-handlers uncollated
 ```
 
-PGOライブラリは次のコマンドで生成する。
+現在の候補ライブラリは次の順で生成する。
 
 ```bash
 bash scripts/run_finite_volume_pgo_nointerpose.sh
+bash scripts/build_finite_volume_pgo_one_partition.sh
+bash scripts/run_openfoam_core_pgo.sh
 ```
 
 ## 残っている検証
 
 `0.8`秒以下の再現可能な構成は未確定である。
-現在はfiniteVolumeのLTO分割とIPA解析を追加した候補をビルドしている。
+探索は2026年8月1日に利用者の指示で停止した。
+停止時点で最適化コンテナは動作していない。
+Pstream比較は64試行中43試行を完了しており、再開時は同じstudyを継続するか、均衡比較を最初から実行する。
 
 最終候補が決まった後、同じ初期条件と終了時刻で基準版と候補版を実行する。
 その出力をVTUへ変換し、`scripts/compare_vtk_fields.py`で`U`、`p_rgh`、`alpha.water`を比較する。
