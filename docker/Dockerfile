@@ -31,6 +31,14 @@ RUN echo "source /usr/lib/openfoam/openfoam2312/etc/bashrc" >> /root/.bashrc
 COPY requirements.txt /tmp/
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
+# Alternative allocator for runtime-only performance experiments.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libjemalloc2 \
+        libtcmalloc-minimal4 \
+        numactl \
+    && rm -rf /var/lib/apt/lists/*
+
 # 作業ディレクトリ
 WORKDIR /workspace
 
