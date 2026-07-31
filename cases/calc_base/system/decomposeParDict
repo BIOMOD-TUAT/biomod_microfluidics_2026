@@ -1,0 +1,23 @@
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+
+numberOfSubdomains 24;
+
+method          scotch;
+
+simpleCoeffs
+{
+    n           (6 4 1);
+    delta       0.001;
+}
+
+hierarchicalCoeffs
+{
+    n           (6 4 1);
+    delta       0.001;
+    order       xyz;
+}
