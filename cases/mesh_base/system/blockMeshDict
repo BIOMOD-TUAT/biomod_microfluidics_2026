@@ -1,15 +1,39 @@
-FoamFile { format ascii; class dictionary; object blockMeshDict; }
-convertToMeters 0.001; // Fusionのmmをmに変換
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
 
-// 無駄なZ方向の余白を削る（Zを -0.5 から 0.5 の範囲に縮小）
-vertices (
-    (-12 -12 -0.5) ( 17 -12 -0.5) ( 17  12 -0.5) (-12  12 -0.5)
-    (-12 -12  0.5) ( 17 -12  0.5) ( 17  12  0.5) (-12  12  0.5)
+convertToMeters 0.001;
+
+// STL全体を包含する背景メッシュ
+// X: -21 ～ 20.5 mm
+// Y: -10 ～ 10 mm
+// Z: -0.05 ～ 0.17 mm
+
+vertices
+(
+    (-21   -10  -0.05)
+    ( 20.5 -10  -0.05)
+    ( 20.5  10  -0.05)
+    (-21    10  -0.05)
+
+    (-21   -10   0.17)
+    ( 20.5 -10   0.17)
+    ( 20.5  10   0.17)
+    (-21    10   0.17)
 );
 
-// 1マスがピッタリ 100 μm (0.1 mm) になるように分割数を増やす
-// X: 29mm÷0.1 = 290, Y: 24mm÷0.1 = 240, Z: 1mm÷0.1 = 10
-// XとYの分割数を半分にし、総セル数を約17万個に抑える
-blocks ( hex (0 1 2 3 4 5 6 7) (145 120 10) simpleGrading (1 1 1) );
+blocks
+(
+    hex (0 1 2 3 4 5 6 7)
+    (208 100 4)
+    simpleGrading (1 1 1)
+);
 
-edges (); boundary ();
+edges ();
+
+boundary ();
+
+mergePatchPairs ();

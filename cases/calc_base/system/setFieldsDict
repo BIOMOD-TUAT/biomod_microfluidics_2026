@@ -1,4 +1,10 @@
-FoamFile { format ascii; class dictionary; location "system"; object setFieldsDict; }
+FoamFile
+{
+    format ascii;
+    class dictionary;
+    location "system";
+    object setFieldsDict;
+}
 
 defaultFieldValues
 (
@@ -9,10 +15,20 @@ regions
 (
     boxToCell
     {
-        // Y座標の範囲を -0.0005(m) から 0.0005(m) に変更しました
-        // これにより、中心から±0.5mmの幅の範囲のみが水になります
-        box (-0.02 -0.0005 -0.001) (-0.0001 0.0005 0.001);
-        
+        box (-0.010 -0.0005 -0.001)
+            ( 0.000  0.0005  0.001);
+
+        fieldValues
+        (
+            volScalarFieldValue alpha.water 1
+        );
+    }
+
+    boxToCell
+    {
+        box (-0.0083 -0.0016 -0.001)
+            (-0.0053  0.0016  0.001);
+
         fieldValues
         (
             volScalarFieldValue alpha.water 1

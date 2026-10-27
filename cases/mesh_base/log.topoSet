@@ -1,0 +1,65 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _9a9aeb73-20260127 OPENFOAM=2312 patch=260127 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : topoSet
+Date   : Oct 27 2026
+Time   : 05:55:26
+Host   : 377ae64f7f57
+PID    : 12993
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /workspace/cases/mesh_base
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create polyMesh for time = 0
+
+Reading topoSetDict
+
+Time = 0
+    mesh not changed.
+Created faceSet inlet_oil_f
+    Applying source boxToFace
+    Adding faces with centre within boxes 1((-0.0199 -0.0016 0.000119) (-0.0169 0.0016 0.000121))
+    faceSet inlet_oil_f now size 3053
+Read set faceSet inlet_oil_f size:3053
+    Applying source boundaryToFace
+    Adding all boundary faces ...
+    faceSet inlet_oil_f now size 3053
+Created faceSet inlet_water_f
+    Applying source boxToFace
+    Adding faces with centre within boxes 1((-0.0083 -0.0016 0.000119) (-0.0053 0.0016 0.000121))
+    faceSet inlet_water_f now size 2879
+Read set faceSet inlet_water_f size:2879
+    Applying source boundaryToFace
+    Adding all boundary faces ...
+    faceSet inlet_water_f now size 2879
+Created faceSet outlet_f
+    Applying source boxToFace
+    Adding faces with centre within boxes 1((0.0151 -0.0018 0.000119) (0.0191 0.0018 0.000121))
+    faceSet outlet_f now size 4764
+Read set faceSet outlet_f size:4764
+    Applying source boundaryToFace
+    Adding all boundary faces ...
+    faceSet outlet_f now size 4764
+
+End
+

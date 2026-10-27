@@ -16,38 +16,32 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
+4
 (
     flow_channel
     {
         type            wall;
         inGroups        1(wall);
-        nFaces          167054;
-        startFace       1160460;
+        nFaces          76858;
+        startFace       405287;
+    }
+    inlet_oil
+    {
+        type            patch;
+        nFaces          3053;
+        startFace       482145;
     }
     inlet_water
     {
         type            patch;
-        nFaces          940;
-        startFace       1327514;
-    }
-    inlet_oil1
-    {
-        type            patch;
-        nFaces          3119;
-        startFace       1328454;
-    }
-    inlet_oil2
-    {
-        type            patch;
-        nFaces          3131;
-        startFace       1331573;
+        nFaces          2879;
+        startFace       485198;
     }
     outlet
     {
         type            patch;
-        nFaces          6227;
-        startFace       1334704;
+        nFaces          4764;
+        startFace       488077;
     }
 )
 

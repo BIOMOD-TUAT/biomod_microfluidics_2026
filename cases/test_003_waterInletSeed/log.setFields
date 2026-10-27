@@ -1,0 +1,42 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _9a9aeb73-20260127 OPENFOAM=2312 patch=260127 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : setFields
+Date   : Oct 27 2026
+Time   : 07:52:20
+Host   : 377ae64f7f57
+PID    : 39623
+I/O    : uncollated
+Case   : /workspace/cases/test_003_waterInletSeed
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Reading setFieldsDict
+
+Setting volume field default values
+    - set internal values of volScalarField: alpha.water = 0
+
+Setting field region values
+
+    Adding cells with centre within boxes 1((-0.01 -0.0005 -0.001) (0 0.0005 0.001))
+    Selected 15252/144632 cells
+    - set internal values of volScalarField: alpha.water = 1
+    Adding cells with centre within boxes 1((-0.0083 -0.0016 -0.001) (-0.0053 0.0016 0.001))
+    Selected 13312/144632 cells
+    - set internal values of volScalarField: alpha.water = 1
+
+End
+

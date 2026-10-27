@@ -1,9 +1,9 @@
 FoamFile
 {
-    format      ascii;
-    class       dictionary;
-    location    "system";
-    object      fvSchemes;
+    format ascii;
+    class dictionary;
+    location "system";
+    object fvSchemes;
 }
 
 ddtSchemes
@@ -18,19 +18,11 @@ gradSchemes
 
 divSchemes
 {
-    // ▼ 安全対策: 下記で個別に指定されていない項はすべて Gauss linear で計算する
     default                             Gauss linear;
 
-    // 速度の移流項
     div(rhoPhi,U)                       Gauss upwind;
-    
-    // 界面（水と油）の移流項
     div(phi,alpha)                      Gauss vanLeer;
-    
-    // 界面の圧縮項（界面のボヤけを防ぐ）
-    div(phirb,alpha)                    Gauss linear;
-    
-    // ▼ 今回のエラー原因：粘性応力テンソルの項（v2312必須）
+    div(phirb,alpha)                    Gauss interfaceCompression vanLeer;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 }
 

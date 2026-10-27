@@ -1,0 +1,93 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2312                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _9a9aeb73-20260127 OPENFOAM=2312 patch=260127 version=2312
+Arch   : "LSB;label=32;scalar=64"
+Exec   : surfaceFeatureExtract
+Date   : Oct 27 2026
+Time   : 05:54:34
+Host   : 377ae64f7f57
+PID    : 12789
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+I/O    : uncollated
+--> FOAM Warning : 
+    From Foam::fileName Foam::cwd_L()
+    in file POSIX.C at line 552
+    PWD is not the cwd() - reverting to physical description
+Case   : /workspace/cases/mesh_base
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+
+Note: Feature line extraction only valid on closed manifold surfaces
+
+Reading surfaceFeatureExtractDict
+
+Surfaces     : flow_channel.stl
+Output       : flow_channel
+Load options : offset
+Write options: writeObj=yes writeVTK=off
+
+Statistics:
+Triangles    : 3584 in 1 region(s)
+Vertices     : 1792
+Bounding Box : (-0.0198576 -0.00872556 0) (0.0190128 0.00881731 0.00012)
+
+Constructing feature set from included angle 120
+Selecting edges based purely on geometric tests: no
+
+Initial Feature set:
+    points : 2
+    edges  : 1793
+    of which
+        region edges   : 0
+        external edges : 1792
+        internal edges : 1
+
+Final Feature set:
+    points : 1792
+    of which
+        convex             : 0
+        concave            : 0
+        mixed              : 2
+        non-feature        : 1790
+    edges  : 1793
+    of which
+        external edges     : 1792
+        internal edges     : 1
+        flat edges         : 0
+        open edges         : 0
+        multiply connected : 0
+
+Writing extendedFeatureEdgeMesh to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel.extendedFeatureEdgeMesh"
+
+Writing extendedEdgeMesh components to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel"
+Writing 0 convex feature points to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_convexFeaturePts.obj"
+Writing 0 concave feature points to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_concaveFeaturePts.obj"
+Writing 2 mixed feature points to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_mixedFeaturePts.obj"
+Writing 2 mixed feature point structure to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_mixedFeaturePtsStructure.obj"
+Writing 1792 external edges to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_externalEdges.obj"
+Writing 1 internal edges to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_internalEdges.obj"
+Writing 0 flat edges to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_flatEdges.obj"
+Writing 0 open edges to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_openEdges.obj"
+Writing 0 multiple edges to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_multipleEdges.obj"
+Writing 0 region edges to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_regionEdges.obj"
+Writing 1793 edge directions to "/workspace/cases/mesh_base/constant/extendedFeatureEdgeMesh/flow_channel_edgeDirections.obj"
+
+Writing featureEdgeMesh to "/workspace/cases/mesh_base/constant/triSurface/flow_channel.eMesh"
+ExecutionTime = 0.04 s  ClockTime = 0 s
+
+End
+

@@ -1,9 +1,41 @@
-FoamFile { format ascii; class dictionary; object createPatchDict; }
+FoamFile
+{
+    format ascii;
+    class dictionary;
+    object createPatchDict;
+}
+
 pointSync false;
-patches (
-    { name inlet_water; patchInfo { type patch; } constructFrom set; set inlet_water_f; }
-    { name inlet_oil1;  patchInfo { type patch; } constructFrom set; set inlet_oil1_f; }
-    { name inlet_oil2;  patchInfo { type patch; } constructFrom set; set inlet_oil2_f; }
-    { name outlet;      patchInfo { type patch; } constructFrom set; set outlet_f; }
+
+patches
+(
+    {
+        name inlet_oil;
+        patchInfo
+        {
+            type patch;
+        }
+        constructFrom set;
+        set inlet_oil_f;
+    }
+
+    {
+        name inlet_water;
+        patchInfo
+        {
+            type patch;
+        }
+        constructFrom set;
+        set inlet_water_f;
+    }
+
+    {
+        name outlet;
+        patchInfo
+        {
+            type patch;
+        }
+        constructFrom set;
+        set outlet_f;
+    }
 );
-// これに指定されなかった残りの面がすべて `flow_channel` (デフォルト壁) になります。

@@ -9,7 +9,6 @@ castellatedMesh true;
 snap            true;
 addLayers       false;
 
-// v2312必須: 頂点マージの許容誤差
 mergeTolerance  1e-6;
 
 geometry
@@ -19,6 +18,16 @@ geometry
         type triSurfaceMesh;
         name flow_channel;
     }
+
+    // 中央の交差部を細分化する領域
+    // 単位は m
+    junctionBox
+    {
+        type searchableBox;
+
+        min (-0.002 -0.002 -0.00005);
+        max ( 0.002  0.002  0.00017);
+    }
 }
 
 castellatedMeshControls
@@ -27,35 +36,46 @@ castellatedMeshControls
     maxGlobalCells 2000000;
     minRefinementCells 10;
     maxLoadUnbalance 0.10;
+
     nCellsBetweenLevels 3;
 
+    // 特徴エッジはLevel 2まで。
+    // 流路全体でLevel 3に細分化されるのを避ける。
     features
     (
         {
             file "flow_channel.eMesh";
-            level 3;
+            level 2;
         }
     );
 
+    // 流路表面は全体でLevel 2
     refinementSurfaces
     {
         flow_channel
         {
-            level (3 4);
+            level (2 2);
         }
     }
 
-    // v2312必須: 使わなくても空のカッコが必要
-    refinementRegions {}
+    // 中央交差部だけLevel 3へ細分化
+    refinementRegions
+    {
+        junctionBox
+        {
+            mode inside;
+            levels
+            (
+                (1e15 3)
+            );
+        }
+    }
 
     resolveFeatureAngle 30;
 
-    // v2312必須: 独立したゾーンの面を許可するかどうかのフラグ
     allowFreeStandingZoneFaces true;
 
-    // 流路内部（空間）の座標。
-    // ※もしFusionで原点(0 0 0)を「壁の面」に設定している場合は、
-    // 確実に空間になるよう (0.001 0.000 0.000) などにずらしてください。
+    // 流体領域内の点。現在の指定を維持する。
     locationInMesh (-0.0005 0 0.000075);
 }
 
@@ -66,17 +86,14 @@ snapControls
     nSolveIter 30;
     nRelaxIter 5;
     nFeatureSnapIter 10;
-    
-    // v2312で要求されることがあるスナップ処理の明示
+
     implicitFeatureSnap false;
     explicitFeatureSnap true;
     multiRegionFeatureSnap false;
 }
 
-// v2312必須: 使わなくても空のカッコが必要
 addLayersControls {}
 
-// v2312必須: 空だとエラーになるため標準値を明記
 meshQualityControls
 {
     maxNonOrtho 65;

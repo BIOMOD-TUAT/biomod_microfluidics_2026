@@ -1,20 +1,57 @@
-FoamFile { format ascii; class dictionary; object topoSetDict; }
+FoamFile
+{
+    format ascii;
+    class dictionary;
+    object topoSetDict;
+}
 
 actions
 (
-    // 1. 水の入り口
-    { name inlet_water_f; type faceSet; action new; source boxToFace; box (-0.0109 -0.002 -0.002) (-0.0099 0.002 0.002); }
-    { name inlet_water_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+    // 油入口：左側の円形ポート
+    {
+        name inlet_oil_f;
+        type faceSet;
+        action new;
+        source boxToFace;
+        box (-0.0199 -0.0016 0.000119)
+            (-0.0169  0.0016 0.000121);
+    }
+    {
+        name inlet_oil_f;
+        type faceSet;
+        action subset;
+        source boundaryToFace;
+    }
 
-    // 2. 油の入り口1
-    { name inlet_oil1_f; type faceSet; action new; source boxToFace; box (-0.002 0.0065 -0.002) (0.002 0.0075 0.002); }
-    { name inlet_oil1_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+    // 水入口：中央の円形ポート
+    {
+        name inlet_water_f;
+        type faceSet;
+        action new;
+        source boxToFace;
+        box (-0.0083 -0.0016 0.000119)
+            (-0.0053  0.0016 0.000121);
+    }
+    {
+        name inlet_water_f;
+        type faceSet;
+        action subset;
+        source boundaryToFace;
+    }
 
-    // 3. 油の入り口2
-    { name inlet_oil2_f; type faceSet; action new; source boxToFace; box (-0.002 -0.0075 -0.002) (0.002 -0.0065 0.002); }
-    { name inlet_oil2_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
-
-    // 4. 出口
-    { name outlet_f; type faceSet; action new; source boxToFace; box (0.0095 -0.002 -0.002) (0.0105 0.002 0.002); }
-    { name outlet_f; type faceSet; action subset; source boundaryToFace; } // ★ここを変更
+    // 出口：右側の円形ポート
+    {
+        name outlet_f;
+        type faceSet;
+        action new;
+        source boxToFace;
+        box (0.0151 -0.0018 0.000119)
+            (0.0191  0.0018 0.000121);
+    }
+    {
+        name outlet_f;
+        type faceSet;
+        action subset;
+        source boundaryToFace;
+    }
 );
