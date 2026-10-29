@@ -1,8 +1,10 @@
+
 #!/usr/bin/env python3
 """Create and launch pressure-driven OpenFOAM interFoam cases."""
 
 import argparse
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -22,6 +24,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="圧力を指定して interFoam の計算ケースを作成・起動します。"
     )
+
     parser.add_argument(
         "--water-kpa",
         type=float,
@@ -33,25 +36,42 @@ def parse_args():
         type=float,
         nargs="+",
         default=[20.0, 30.0],
-        help="油入口圧力 [kPa]。複数指定できます（既定値: 20 30）",
+        help="油入口圧力 [kPa]。複数指定できます",
     )
     parser.add_argument(
         "--end-time",
         type=float,
         default=None,
-        help="解析終了時刻 [s]。省略時はテンプレートの設定を使用",
+        help="解析終了時刻 [s]",
     )
     parser.add_argument(
         "--write-interval",
         type=float,
         default=None,
-        help="結果保存間隔 [s]。省略時はテンプレートの設定を使用",
+        help="結果保存間隔 [s]",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="MPI並列計算を有効にします",
+    )
+    parser.add_argument(
+        "--n-procs",
+        type=int,
+        default=4,
+        help="MPIプロセス数（既定値: 4）",
     )
     parser.add_argument(
         "--prepare-only",
         action="store_true",
-        help="ケースの準備だけ行い、ソルバーは起動しません",
+        help="ケースの準備だけ行い、計算を起動しません",
     )
+    parser.add_argument(
+        "--wait",
+        action="store_true",
+        help="起動したすべての計算が終了するまで待機します",
+    )
+
     args = parser.parse_args()
 
     pressures = [args.water_kpa, *args.oil_kpa]
@@ -67,20 +87,22 @@ def parse_args():
             not math.isfinite(args.write_interval)
             or args.write_interval <= 0
         ):
-            parser.error(
-                "--write-interval は正の有限値にしてください。"
-            )
+            parser.error("--write-interval は正の有限値にしてください。")
+
+    if args.n_procs < 1:
+        parser.error("--n-procs は1以上にしてください。")
+
+    if args.wait and args.prepare_only:
+        parser.error("--wait と --prepare-only は同時に指定できません。")
 
     return args
 
 
 def number_label(value):
-    """Convert 14.5 to '14p5' for directory names."""
     return format(value, "g").replace("-", "m").replace(".", "p")
 
 
 def pressure_pa(value_kpa):
-    """Convert kPa to Pa, rounded to the nearest whole Pa."""
     return round(value_kpa * 1000)
 
 
@@ -107,26 +129,33 @@ def extract_braced_block(text, patch_name):
         elif text[index] == "}":
             depth -= 1
             if depth == 0:
-                return match.start(), index + 1, text[match.start():index + 1]
+                return (
+                    match.start(),
+                    index + 1,
+                    text[match.start():index + 1],
+                )
 
     raise RuntimeError(f"パッチ '{patch_name}' の括弧が閉じていません。")
 
 
 def replace_entry(path, key, value):
-    """Replace a top-level dictionary entry such as endTime."""
     text = path.read_text(encoding="utf-8")
+
     pattern = re.compile(
         rf"(?m)^([ \t]*{re.escape(key)}[ \t]+)[^;\n]*;"
     )
+
     updated, count = pattern.subn(
         lambda match: match.group(1) + f"{value};",
         text,
         count=1,
     )
+
     if count != 1:
         raise RuntimeError(
             f"{path} の '{key}' を更新できませんでした。"
         )
+
     path.write_text(updated, encoding="utf-8")
 
 
@@ -145,6 +174,7 @@ def set_patch_pressure(path, patch_name, value_pa):
         block,
         count=1,
     )
+
     if count != 1:
         raise RuntimeError(
             f"{path}: {patch_name} の圧力値を更新できませんでした。"
@@ -173,10 +203,13 @@ def run_logged(command, cwd, log_name):
 
     if result.returncode != 0:
         lines = log_path.read_text(
-            encoding="utf-8", errors="replace"
+            encoding="utf-8",
+            errors="replace",
         ).splitlines()
+
         print("\n--- ログ末尾 ---")
         print("\n".join(lines[-40:]))
+
         raise RuntimeError(
             f"{command[0]} が終了コード {result.returncode} "
             "で失敗しました。"
@@ -199,10 +232,14 @@ def next_run_number(cases_dir):
 def validate_field_patches(case_dir):
     for field_name in ("U", "p_rgh", "alpha.water"):
         field_path = case_dir / "0.orig" / field_name
+
         if not field_path.is_file():
-            raise FileNotFoundError(f"必要なファイルがありません: {field_path}")
+            raise FileNotFoundError(
+                f"必要なファイルがありません: {field_path}"
+            )
 
         text = field_path.read_text(encoding="utf-8")
+
         for patch in REQUIRED_PATCHES:
             if not patch_pattern(patch).search(text):
                 raise RuntimeError(
@@ -215,12 +252,17 @@ def validate_outlet_pressure(path):
     _, _, block = extract_braced_block(text, "outlet")
 
     if not re.search(r"\btype\s+fixedValue\s*;", block):
-        raise RuntimeError("p_rgh の outlet は fixedValue ではありません。")
+        raise RuntimeError(
+            "p_rgh の outlet は fixedValue ではありません。"
+        )
 
     if not re.search(
-        r"\bvalue\s+uniform\s+0(?:\.0*)?\s*;", block
+        r"\bvalue\s+uniform\s+0(?:\.0*)?\s*;",
+        block,
     ):
-        raise RuntimeError("p_rgh の outlet 圧力は 0 Pa にしてください。")
+        raise RuntimeError(
+            "p_rgh の outlet 圧力は 0 Pa にしてください。"
+        )
 
 
 def prepare_case(
@@ -231,6 +273,8 @@ def prepare_case(
     oil_kpa,
     end_time,
     write_interval,
+    parallel,
+    n_procs,
 ):
     if run_dir.exists():
         raise FileExistsError(
@@ -245,14 +289,21 @@ def prepare_case(
     print(f"水入口: {water_kpa:g} kPa ({water_pa} Pa)")
     print(f"油入口: {oil_kpa:g} kPa ({oil_pa} Pa)")
     print("出口: 0 Pa")
+    print(
+        f"計算方式: MPI並列 ({n_procs} プロセス)"
+        if parallel
+        else "計算方式: シングルプロセス"
+    )
     print("=" * 60)
 
     shutil.copytree(calc_base, run_dir)
 
     target_mesh = run_dir / "constant" / "polyMesh"
     target_mesh.parent.mkdir(parents=True, exist_ok=True)
+
     if target_mesh.exists():
         shutil.rmtree(target_mesh)
+
     shutil.copytree(mesh_source, target_mesh)
 
     validate_field_patches(run_dir)
@@ -263,8 +314,14 @@ def prepare_case(
     validate_outlet_pressure(p_rgh)
 
     control_dict = run_dir / "system" / "controlDict"
+
     if end_time is not None:
-        replace_entry(control_dict, "endTime", format(end_time, ".12g"))
+        replace_entry(
+            control_dict,
+            "endTime",
+            format(end_time, ".12g"),
+        )
+
     if write_interval is not None:
         replace_entry(
             control_dict,
@@ -275,29 +332,78 @@ def prepare_case(
     time_zero = run_dir / "0"
     if time_zero.exists():
         shutil.rmtree(time_zero)
+
     shutil.copytree(run_dir / "0.orig", time_zero)
 
     run_logged(["setFields"], run_dir, "log.setFields")
 
+    # Create the empty marker file for ParaView.
+    (run_dir / f"{run_dir.name}.foam").touch()
+
+    if parallel:
+        decompose_dict = run_dir / "system" / "decomposeParDict"
+
+        if not decompose_dict.is_file():
+            raise FileNotFoundError(
+                f"MPI並列用の設定ファイルがありません: {decompose_dict}"
+            )
+
+        replace_entry(
+            decompose_dict,
+            "numberOfSubdomains",
+            n_procs,
+        )
+
+        run_logged(
+            ["decomposePar", "-force"],
+            run_dir,
+            "log.decomposePar",
+        )
+
     print(f"[OK] 準備完了: {run_dir}")
 
 
-def launch_solver(run_dir):
-    log_path = run_dir / "log.interFoam"
+def launch_solver(run_dir, parallel, n_procs):
+    if parallel:
+        command = [
+            "mpirun",
+            "-np",
+            str(n_procs),
+            "interFoam",
+            "-parallel",
+        ]
+        log_name = "log.interFoam.parallel"
+    else:
+        command = ["interFoam"]
+        log_name = "log.interFoam"
+
+    log_path = run_dir / log_name
+    env = os.environ.copy()
+
+    if parallel:
+        env["OMPI_ALLOW_RUN_AS_ROOT"] = "1"
+        env["OMPI_ALLOW_RUN_AS_ROOT_CONFIRM"] = "1"
+
     with log_path.open("w", encoding="utf-8") as log:
         process = subprocess.Popen(
-            ["interFoam"],
+            command,
             cwd=run_dir,
             stdout=log,
             stderr=subprocess.STDOUT,
             start_new_session=True,
+            env=env,
         )
 
     (run_dir / "interFoam.pid").write_text(
-        f"{process.pid}\n", encoding="utf-8"
+        f"{process.pid}\n",
+        encoding="utf-8",
     )
+
     print(f"[起動] {run_dir.name}: PID={process.pid}")
+    print(f"       コマンド: {' '.join(command)}")
     print(f"       ログ: {log_path}")
+
+    return process
 
 
 def main():
@@ -309,39 +415,64 @@ def main():
     mesh_source = cases_dir / "mesh_base" / "constant" / "polyMesh"
 
     if not calc_base.is_dir():
-        raise FileNotFoundError(f"テンプレートがありません: {calc_base}")
-    if not (mesh_source / "boundary").is_file():
-        raise FileNotFoundError(f"メッシュがありません: {mesh_source}")
+        raise FileNotFoundError(
+            f"テンプレートがありません: {calc_base}"
+        )
 
-    # Ensure the reusable template includes the seeded initial water region.
+    if not (mesh_source / "boundary").is_file():
+        raise FileNotFoundError(
+            f"メッシュがありません: {mesh_source}"
+        )
+
     set_fields_dict = calc_base / "system" / "setFieldsDict"
     seed_text = set_fields_dict.read_text(encoding="utf-8")
+
     if seed_text.count("boxToCell") < 2:
         raise RuntimeError(
             f"{set_fields_dict} に水相の初期領域が2つありません。"
             "テンプレート修正コマンドを先に実行してください。"
         )
 
+    if args.parallel:
+        decompose_dict = calc_base / "system" / "decomposeParDict"
+
+        if not decompose_dict.is_file():
+            raise FileNotFoundError(
+                f"MPI並列用の設定ファイルがありません: {decompose_dict}"
+            )
+
     first_number = next_run_number(cases_dir)
     run_dirs = []
 
     print("\n指定された圧力")
     print(f"  水入口: {args.water_kpa:g} kPa")
-    print(f"  油入口: {', '.join(format(p, 'g') for p in args.oil_kpa)} kPa")
+    print(
+        "  油入口: "
+        + ", ".join(format(p, "g") for p in args.oil_kpa)
+        + " kPa"
+    )
     print("  出口: 0 Pa")
+    print(
+        f"  計算方式: MPI並列 ({args.n_procs} プロセス)"
+        if args.parallel
+        else "  計算方式: シングルプロセス"
+    )
 
     if args.end_time is not None:
         print(f"  今回の endTime: {args.end_time:g} s")
     else:
         print("  endTime: calc_base/system/controlDict の設定を使用")
 
-    # Prepare all requested cases before launching any solver.
+    # Prepare every case before launching any solver.
     for offset, oil_kpa in enumerate(args.oil_kpa):
         label = (
             f"water{number_label(args.water_kpa)}kPa_"
             f"oil{number_label(oil_kpa)}kPa"
         )
-        run_dir = cases_dir / f"run_{first_number + offset:03d}_{label}"
+
+        run_dir = cases_dir / (
+            f"run_{first_number + offset:03d}_{label}"
+        )
 
         prepare_case(
             calc_base=calc_base,
@@ -351,20 +482,49 @@ def main():
             oil_kpa=oil_kpa,
             end_time=args.end_time,
             write_interval=args.write_interval,
+            parallel=args.parallel,
+            n_procs=args.n_procs,
         )
+
         run_dirs.append(run_dir)
 
     if args.prepare_only:
         print("\n準備のみ完了しました。ソルバーは起動していません。")
         return
 
-    print("\nケースをバックグラウンドで起動します。")
+    print("\nケースを起動します。")
+    processes = []
+
     for run_dir in run_dirs:
-        launch_solver(run_dir)
+        process = launch_solver(
+            run_dir=run_dir,
+            parallel=args.parallel,
+            n_procs=args.n_procs,
+        )
+        processes.append((run_dir, process))
 
     print("\n起動したケース:")
-    for run_dir in run_dirs:
+    for run_dir, _ in processes:
         print(f"  {run_dir}")
+
+    if args.wait:
+        print("\nすべてのケースの終了を待っています...")
+        failed = []
+
+        for run_dir, process in processes:
+            return_code = process.wait()
+
+            if return_code != 0:
+                failed.append((run_dir.name, return_code))
+
+        if failed:
+            details = ", ".join(
+                f"{name} (終了コード {code})"
+                for name, code in failed
+            )
+            raise RuntimeError(f"計算に失敗したケース: {details}")
+
+        print("\nすべてのケースが正常終了しました。")
 
 
 if __name__ == "__main__":

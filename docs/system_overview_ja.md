@@ -88,10 +88,12 @@ flowchart TD
 3. `mesh_base/constant/polyMesh` を `run_XXX/constant/polyMesh` にコピー。
 4. `run_XXX/0.orig` を `run_XXX/0` にコピー。
 5. `setFields` 実行。
-6. `interFoam` をバックグラウンド起動（`log.interFoam` へ出力）。
+6. `interFoam` をバックグラウンド起動（シリアル: `log.interFoam`、並列: `log.interFoam.parallel`）。
 
 特徴:
 - 実行履歴を `run_001`, `run_002`, ... と蓄積できる。
+- `--parallel --n-procs N` で `mpirun -np N interFoam -parallel` を起動できる。
+- 起動PIDを `interFoam.pid` に保存するため、ケース単位でプロセスグループ停止できる。
 - 失敗時はその場で終了し、該当ログの確認を促す。
 
 ## 6. メッシュ設定ファイル（`cases/mesh_base/system`）
@@ -130,8 +132,7 @@ flowchart TD
 
 - faceSet からパッチを生成:
   - `inlet_water`
-  - `inlet_oil1`
-  - `inlet_oil2`
+  - `inlet_oil`
   - `outlet`
 - 指定外面は壁面（`flow_channel`）として残る。
 
@@ -239,10 +240,70 @@ flowchart TD
 4. `cases/run_XXX/log.interFoam` を監視
 5. 結果可視化（ParaView, PyVista等）
 
-## 11. 最低限の引き継ぎチェック項目
+## 11. 実行監視・停止・並列投入の実践手順
+
+### 実行中プロセスを確認する
+
+コンテナ内で以下を実行する。
+
+```bash
+echo "===== interFoamのプロセス数 ====="
+pgrep -x interFoam | wc -l
+
+echo "===== mpirunのプロセス数 ====="
+pgrep -x mpirun | wc -l
+
+echo "===== 実行中の計算一覧 ====="
+ps -eo pid,ppid,pgid,pcpu,pmem,etime,args |
+  grep -E '[i]nterFoam|[m]pirun'
+```
+
+- `interFoam`: 実際のソルバープロセス
+- `mpirun`: 並列計算の起動プロセス
+
+### 特定ケースだけ停止する
+
+ケースごとに独立したプロセスグループで起動するため、PIDファイルからグループ停止できる。
+
+```bash
+cd /workspace/cases/run_009_water14p5kPa_oil25kPa
+
+pid=$(cat interFoam.pid)
+kill -TERM -- "-$pid"
+```
+
+停止後は、上記のプロセス一覧コマンドで対象ケースが終了したことを確認する。
+
+注意:
+- `pkill interFoam` は使わない。別ケースまで停止する可能性がある。
+
+### 複数ケースを同時に各4プロセスで実行する
+
+```bash
+cd /workspace
+
+python3 scripts/allrun.py \
+  --water-kpa 14.5 \
+  --oil-kpa 25 35 40 \
+  --parallel \
+  --n-procs 4
+```
+
+この実行で、3ケースがそれぞれバックグラウンド起動される。
+
+- 3ケース × 4プロセス = ソルバー12プロセス
+- 各ケースのログは `log.interFoam.parallel`
+- 終了判定はログ末尾の `End`
+
+運用上の注意:
+- 16論理CPU環境では12プロセス並列は試す価値があるが、メッシュ分割や通信でCPU・メモリを追加消費する。
+- 25/35/40 kPa の旧ケースを継続中に同条件を再投入すると、新しい `run_XXX` が追加で作成される。
+- 旧ケースを継続しないなら先に停止し、継続するなら計算資源を確認してから追加投入する。
+
+## 12. 最低限の引き継ぎチェック項目
 
 - `mesh_base/constant/polyMesh` が最新STL由来か。
-- `createPatch` 後に境界名が期待通りか（入口3種 + 出口 + 壁）。
+- `createPatch` 後に境界名が期待通りか（`inlet_water` + `inlet_oil` + `outlet` + `flow_channel`）。
 - `run_XXX/0` の初期場が `0.orig` + `setFields` 反映後になっているか。
 - `log.interFoam` に致命エラーがないか。
 - `maxCo` と `maxAlphaCo` が破綻していないか。

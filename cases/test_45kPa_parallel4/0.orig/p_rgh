@@ -1,0 +1,38 @@
+FoamFile
+{
+    format ascii;
+    class volScalarField;
+    location "0";
+    object p_rgh;
+}
+
+dimensions [1 -1 -2 0 0 0 0];
+
+internalField uniform 0;
+
+boundaryField
+{
+    inlet_water
+    {
+        type fixedValue;
+        value uniform 14500;
+    }
+
+    inlet_oil
+    {
+        type fixedValue;
+        value uniform 45000;
+    }
+
+    outlet
+    {
+        type fixedValue;
+        value uniform 0;
+    }
+
+    flow_channel
+    {
+        type fixedFluxPressure;
+        value uniform 0;
+    }
+}
