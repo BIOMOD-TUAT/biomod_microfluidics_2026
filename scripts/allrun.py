@@ -58,8 +58,8 @@ def parse_args():
     parser.add_argument(
         "--n-procs",
         type=int,
-        default=4,
-        help="MPIプロセス数（既定値: 4）",
+        default=8,
+        help="MPIプロセス数（既定値: 8）",
     )
     parser.add_argument(
         "--prepare-only",

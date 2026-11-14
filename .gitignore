@@ -1,5 +1,5 @@
 # OpenFOAMの生成メッシュ・結果ファイル
-*/polyMesh/
+**/polyMesh/
 postProcessing/
 *.obj
 *.vtk

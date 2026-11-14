@@ -10,8 +10,8 @@ solvers
 {
     p_rgh
     {
-        solver          PCG;
-        preconditioner  DIC;
+        solver          GAMG;
+        smoother        GaussSeidel;
         tolerance       1e-07;
         relTol          0.05;
     }
@@ -71,5 +71,5 @@ PIMPLE
     momentumPredictor        no;
     nOuterCorrectors         1;
     nCorrectors              3;
-    nNonOrthogonalCorrectors 0;
+    nNonOrthogonalCorrectors 1; // ← 局所メッシュ細分化による反復増加を防ぐため 0 から 1 に変更
 }

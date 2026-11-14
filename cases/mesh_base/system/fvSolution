@@ -1,31 +1,37 @@
-FoamFile { format ascii; class dictionary; location "system"; object fvSolution; }
-solvers {
-    p_rgh {
-        solver          PCG;
-        preconditioner  DIC;
+solvers
+{
+    p_rgh
+    {
+        solver          GAMG;
+        smoother        GaussSeidel;
         tolerance       1e-07;
         relTol          0.05;
     }
-    p_rghFinal {
+    p_rghFinal
+    {
         $p_rgh;
         relTol          0;
     }
-    pcorr {
+    pcorr
+    {
         $p_rgh;
         tolerance       1e-05;
         relTol          0;
     }
-    pcorrFinal {
+    pcorrFinal
+    {
         $pcorr;
         relTol          0;
     }
-    U {
+    U
+    {
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       1e-06;
         relTol          0;
     }
-    alpha.water {
+    alpha.water
+    {
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       1e-08;
@@ -35,9 +41,11 @@ solvers {
         nAlphaSubCycles 1;
     }
 }
-PIMPLE {
+
+PIMPLE
+{
     momentumPredictor no;
     nOuterCorrectors 1;
-    nCorrectors     3;
-    nNonOrthogonalCorrectors 0;
+    nCorrectors      3;
+    nNonOrthogonalCorrectors 1; // ← 0 から 1 または 2 に変更を推奨
 }

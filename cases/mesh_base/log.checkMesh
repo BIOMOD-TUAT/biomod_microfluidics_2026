@@ -8,10 +8,10 @@
 Build  : _9a9aeb73-20260127 OPENFOAM=2312 patch=260127 version=2312
 Arch   : "LSB;label=32;scalar=64"
 Exec   : checkMesh
-Date   : Oct 27 2026
-Time   : 05:55:28
-Host   : 377ae64f7f57
-PID    : 13019
+Date   : Nov 10 2026
+Time   : 04:25:49
+Host   : 26d331550b55
+PID    : 9725
 --> FOAM Warning : 
     From Foam::fileName Foam::cwd_L()
     in file POSIX.C at line 552
@@ -41,30 +41,29 @@ Check mesh...
 Time = constant
 
 Mesh stats 
-    points:           205143
-    faces:            492841
-    internal faces:   405287
-    cells:            144632
-    faces per cell:   6.20975
+    points:           1537508
+    faces:            4348918
+    internal faces:   4128284
+    cells:            1406800
+    faces per cell:   6.02588
     boundary patches: 4
     point zones:      1
     face zones:       0
     cell zones:       0
 
 Overall number of cells of each type:
-    hexahedra:     137080
+    hexahedra:     1397222
     prisms:        0
     wedges:        0
     pyramids:      0
     tet wedges:    0
     tetrahedra:    0
-    polyhedra:     7552
+    polyhedra:     9578
     Breakdown of polyhedra by number of faces:
         faces   number of cells
-            6   22
-            9   5924
-           12   776
-           15   684
+            9   7994
+           12   758
+           15   680
            18   146
 
 Checking topology...
@@ -77,11 +76,11 @@ Checking topology...
 
 Checking patch topology for multiply connected surfaces...
                    Patch    Faces   Points  Surface topology
-            flow_channel    76858    77367  ok (non-closed singly connected)
+            flow_channel   209938   210725  ok (non-closed singly connected)
                inlet_oil     3053     3199  ok (non-closed singly connected)
              inlet_water     2879     3022  ok (non-closed singly connected)
                   outlet     4764     4943  ok (non-closed singly connected)
-                    ".*"    87554    87601      ok (closed singly connected)
+                    ".*"   220634   220959      ok (closed singly connected)
 
 
 Checking faceZone topology for multiply connected surfaces...
@@ -98,18 +97,18 @@ Checking geometry...
     Overall domain bounding box (-0.0198573 -0.00872544 0) (0.0190127 0.00881717 0.00012)
     Mesh has 3 geometric (non-empty/wedge) directions (1 1 1)
     Mesh has 3 solution (non-empty) directions (1 1 1)
-    Boundary openness (-3.78144e-17 4.36845e-17 4.03598e-15) OK.
-    Max cell openness = 3.15168e-16 OK.
-    Max aspect ratio = 19.0819 OK.
-    Minimum face area = 1.87804e-11. Maximum face area = 1.4099e-08.  Face area magnitudes OK.
-    Min volume = 4.47417e-16. Max volume = 4.85175e-13.  Total volume = 6.33751e-09.  Cell volumes OK.
-    Mesh non-orthogonality Max: 73.465 average: 16.8386
-   *Number of severely non-orthogonal (> 70 degrees) faces: 4.
+    Boundary openness (-9.16057e-16 1.57392e-15 3.91873e-15) OK.
+    Max cell openness = 3.35518e-16 OK.
+    Max aspect ratio = 28.8459 OK.
+    Minimum face area = 1.05068e-12. Maximum face area = 1.4099e-08.  Face area magnitudes OK.
+    Min volume = 7.6514e-18. Max volume = 4.85175e-13.  Total volume = 6.33748e-09.  Cell volumes OK.
+    Mesh non-orthogonality Max: 73.9573 average: 5.72552
+   *Number of severely non-orthogonal (> 70 degrees) faces: 10.
     Non-orthogonality check OK.
-  <<Writing 4 non-orthogonal faces to set nonOrthoFaces
+  <<Writing 10 non-orthogonal faces to set nonOrthoFaces
     Face pyramids OK.
- ***Max skewness = 32.479, 56 highly skew faces detected which may impair the quality of the results
-  <<Writing 56 skew faces to set skewFaces
+ ***Max skewness = 32.479, 95 highly skew faces detected which may impair the quality of the results
+  <<Writing 95 skew faces to set skewFaces
     Coupled point location match (average 0) OK.
 
 Failed 1 mesh checks.
